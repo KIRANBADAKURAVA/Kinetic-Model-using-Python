@@ -1,1 +1,0 @@
-# Kinectic Model Using Python
