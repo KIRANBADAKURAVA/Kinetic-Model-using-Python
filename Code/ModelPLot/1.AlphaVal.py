@@ -76,9 +76,9 @@ def FAlpha(data_frames, model):
         print(f"Unknown model: {model}")
 
 model = input('Enter the model name: ')
-FAlpha(data_frames, model)
+# FAlpha(data_frames, model)
 
-output_file_path = f'C:/Users/kiran/OneDrive/Desktop/Internship/data/AlphaData/HP{condition_name}_{model}.txt'
-data_frames[condition_name].to_csv(output_file_path, sep=';', index=False, encoding='latin1')
+# output_file_path = f'C:/Users/kiran/OneDrive/Desktop/Internship/data/AlphaData/HP{condition_name}_{model}.txt'
+# data_frames[condition_name].to_csv(output_file_path, sep=';', index=False, encoding='latin1')
 
 print(data_frames[condition_name])
