@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load the data
-file_path = r'C:\Users\kiran\OneDrive\Desktop\Model Repo\Kinetic-Model-using-Python\data\AlphaData\HP0_10_D1.txt'  # Replace with your actual file path
+file_path = r'C:\Users\kiran\OneDrive\Desktop\Model Repo\Kinetic-Model-using-Python\data\AlphaData\HP4_30_D1.txt'  # Replace with your actual file path
 data = pd.read_csv(file_path, delimiter=';')
 
 # Function to find the row with the alpha value closest to each target value
