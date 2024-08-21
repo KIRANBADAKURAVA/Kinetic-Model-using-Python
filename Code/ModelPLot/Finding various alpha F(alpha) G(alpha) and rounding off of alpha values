@@ -1,0 +1,117 @@
+import pandas as pd
+import numpy as np
+import glob
+
+# Define the file pattern and load the files
+file_pattern = r'C:\Users\Pranav\Desktop\Aug\HP3_15.txt'
+file_paths = glob.glob(file_pattern)
+
+# Initialize an empty dictionary to store data frames
+data_frames = {}
+
+# Prompt the user to enter the condition name
+condition_name = input("Enter the condition name: ")
+
+# Load and process each file
+for file_path in file_paths:
+    filename = file_path.split('\\')[-1].split('.')[0]
+    conditions = filename.split('_')
+    condition_1 = conditions[0][2:]
+    condition_2 = conditions[1]
+    condition = f'{condition_1}_{condition_2}'
+    
+    try:
+        # Load the data
+        df = pd.read_csv(file_path, sep=';', header=0, encoding='latin1')
+        df["Alpha"] = (100 - df["Mass/%"]) / (100 - df["Mass/%"].iloc[-1])
+        data_frames[condition] = df
+    
+    except pd.errors.ParserError as e:
+        print(f"ParserError: {e}")
+
+# Function to compute F_alpha and G_alpha based on the selected model
+def FAlpha(data_frames, condition_name, model):
+    alpha = data_frames[condition_name]["Alpha"]
+    
+    if model == 'D1':
+        data_frames[condition_name]["F_alpha"] = 1 / (2 * alpha)
+        data_frames[condition_name]["G_alpha"] = alpha ** 2
+    
+    elif model == 'D2':
+        data_frames[condition_name]["F_alpha"] = (-np.log(1 - alpha)) ** (-1)
+        data_frames[condition_name]["G_alpha"] = (1 - alpha) * np.log(1 - alpha) + alpha
+    
+    elif model == 'D3':
+        part1 = ((3 / 2) * (1 - alpha)) ** (2 / 3)
+        part2 = 1 - (1 - alpha) ** (1 / 3)
+        data_frames[condition_name]["F_alpha"] = part1 * part2
+        data_frames[condition_name]["G_alpha"] = (1 - (1 - alpha) * (1 / 3)) * 2
+    
+    elif model == 'D4':
+        data_frames[condition_name]["F_alpha"] = (((1 - alpha) * (-1 / 3) - 1) * (-1 / 3)) * (3 / 2)
+        term1 = 1 - (2 * alpha / 3)
+        term2 = (1 - alpha) ** (2 / 3)
+        data_frames[condition_name]["G_alpha"] = term1 - term2
+    
+    elif model == 'F0':
+        data_frames[condition_name]["F_alpha"] = 1
+        data_frames[condition_name]["G_alpha"] = alpha
+    
+    elif model == 'F1':
+        data_frames[condition_name]["F_alpha"] = 1 - alpha
+        data_frames[condition_name]["G_alpha"] = -np.log(1 - alpha)
+    
+    elif model == 'R2':
+        data_frames[condition_name]["F_alpha"] = 2 * ((1 - alpha) ** (1 / 2))
+        data_frames[condition_name]["G_alpha"] = 1 - ((1 - alpha) ** (1 / 2))
+    
+    elif model == 'R3':
+        data_frames[condition_name]["F_alpha"] = 3 * ((1 - alpha) ** (2 / 3))
+        data_frames[condition_name]["G_alpha"] = 1 - ((1 - alpha) ** (1 / 3))
+    
+    elif model == 'A2':
+        data_frames[condition_name]["F_alpha"] = 2 * (1 - alpha) * (-np.log(1 - alpha)) ** (1 / 2)
+        data_frames[condition_name]["G_alpha"] = (-np.log(1 - alpha)) ** (1 / 2)
+    
+    elif model == 'A3':
+        data_frames[condition_name]["F_alpha"] = 3 * (1 - alpha) * (-np.log(1 - alpha)) ** (2 / 3)
+        data_frames[condition_name]["G_alpha"] = (-np.log(1 - alpha)) ** (1 / 3)
+    
+    else:
+        print(f"Unknown model: {model}")
+
+# Prompt the user to enter the model name and process the data
+model = input('Enter the model name: ')
+FAlpha(data_frames, condition_name, model)
+
+# Save the processed data to a file
+output_file_path = fr'C:\Users\Pranav\Desktop\Aug\alpha_values_315_{condition_name}_{model}.txt'
+data_frames[condition_name].to_csv(output_file_path, sep=';', index=False, encoding='latin1')
+
+# Reload the saved data for further processing
+data = pd.read_csv(output_file_path, delimiter=';')
+
+# Function to find the row with the alpha value closest to each target value
+def find_closest_rows(data, target_alphas):
+    closest_rows = pd.DataFrame()
+    for alpha in target_alphas:
+        closest_row = data.iloc[(data['Alpha'] - alpha).abs().argmin()]
+        closest_rows = pd.concat([closest_rows, closest_row.to_frame().T], ignore_index=True)
+    return closest_rows
+
+# Define the range of target alpha values
+target_alphas = [i/1000 for i in range(25, 1001, 5)]
+
+# Find and filter the closest rows for the extended range of target alphas
+closest_rows_extended = find_closest_rows(data, target_alphas)
+closest_rows_unique = closest_rows_extended.drop_duplicates()
+
+# Round off alpha values to 2 decimal places and remove duplicates
+closest_rows_unique['Alpha'] = closest_rows_unique['Alpha'].round(2)
+closest_rows_final = closest_rows_unique.drop_duplicates(subset=['Alpha'])
+
+# Display the final filtered data
+print(closest_rows_final)
+
+# Save the final dataset to a CSV file
+closest_rows_final.to_csv('filtered_alpha_values315.csv', index=False)

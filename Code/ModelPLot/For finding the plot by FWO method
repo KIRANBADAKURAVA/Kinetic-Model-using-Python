@@ -1,0 +1,95 @@
+#FWO
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+# Load the data from the uploaded Excel file
+file_path = r'C:\Users\Pranav\Desktop\Final H valuessssss\H1final.xlsx'  # Use raw string to handle backslashes
+data = pd.read_excel(file_path)
+
+
+# Add a new column for 1/Temp
+data['1/Temp'] = 1 / data['##Temp./°C']
+
+# Filter the dataset for different alpha values
+alpha_values = data['Alpha'].unique()
+
+# Create dictionaries to store regression results, slopes, R² values, and Ea values
+regression_results = {}
+slopes = {}
+r2_values = {}
+Ea_values = {}
+
+# Gas constant in J/(mol·K)
+R = 8.314
+
+# Set up the plot
+plt.figure(dpi=500, figsize=(10, 8))
+
+# Loop through each alpha value and create a linear regression model
+for alpha in alpha_values:
+    # Filter the data for the current alpha value
+    alpha_data = data[data['Alpha'] == alpha]
+    
+    # Extract the 1/Temp and lnB columns
+    X = alpha_data['1/Temp']
+    y = alpha_data['lnB']
+    
+    # Add a constant to the predictor variable matrix (for the intercept)
+    X = sm.add_constant(X)
+    
+    # Create the linear regression model
+    model = sm.OLS(y, X).fit()
+    
+    # Store the results
+    regression_results[alpha] = model
+    
+    # Store the slope (coefficient of 1/Temp)
+    slope = model.params['1/Temp']
+    slopes[alpha] = slope
+    
+    # Store the R² value
+    r2_values[alpha] = model.rsquared
+    
+    # Calculate and store the Ea value
+    Ea = (slope * R) / -1.051
+    Ea_values[alpha] = Ea
+    
+    # Plot the data and the regression line with transparency
+    sns.scatterplot(x=alpha_data['1/Temp'], y=alpha_data['lnB'], label=f'Alpha = {alpha}', alpha=0.6)
+    sns.lineplot(x=alpha_data['1/Temp'], y=model.predict(X), label=f'Regression line (Alpha = {alpha})', alpha=0.6)
+
+# Add plot details
+plt.xlabel('1/Temperature (1/k)', fontweight='bold', fontsize=13)
+plt.ylabel('lnB', fontweight='bold', fontsize=13)
+plt.title('Linear Regression of lnB vs 1/Temperature for Different Alpha Values', fontsize=16, fontweight='bold')
+
+# Adjust legend to avoid overcrowding (optional)
+handles, labels = plt.gca().get_legend_handles_labels()
+by_label = dict(zip(labels, handles))
+plt.legend(by_label.values(), by_label.keys(), bbox_to_anchor=(1.05, 1), loc='upper left')
+
+plt.show()
+
+# Print the R² and Ea values
+for alpha in alpha_values:
+    print(f'Alpha = {alpha}: R² = {r2_values[alpha]:.4f}, Ea = {Ea_values[alpha]:.2f} J/mol')
+    
+    # Prepare data for saving to Excel
+output_data = []
+for alpha in alpha_values:
+    output_data.append({
+        'Alpha': alpha,
+        'R²': r2_values[alpha],
+        'Ea (J/mol)': Ea_values[alpha]
+    })
+
+# Convert to DataFrame
+output_df = pd.DataFrame(output_data)
+
+# Save to Excel
+output_file_path = r'C:\Users\Pranav\Desktop\Final H valuessssss\alpha_values_results0.5FWO.xlsx'
+output_df.to_excel(output_file_path, index=False)
+
+print(f"Data saved to '{output_file_path}'") 

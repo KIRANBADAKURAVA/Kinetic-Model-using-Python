@@ -1,0 +1,49 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+# Load the data from the uploaded Excel file
+file_path = r'C:\Users\Pranav\Desktop\CR\H3R2.xlsx'
+data = pd.read_excel(file_path)
+
+# Add a new column for 1/Temp
+data['1/Temp'] = 1 / data['##Temp./°C']
+
+# Extract the relevant columns
+X = data['1/Temp']
+y = data['ln(G/T)']
+
+# Add a constant to the predictor variable matrix (for the intercept)
+X = sm.add_constant(X)
+
+# Create the linear regression model
+model = sm.OLS(y, X).fit()
+
+# Print the regression results summary
+print(model.summary())
+
+# Extract the slope (coefficient of '1/Temp') and R-squared value
+slope = model.params['1/Temp']
+R_squared = model.rsquared
+
+# Calculate the activation energy (Ea)
+R = 8.314  # Gas constant in J/mol·K
+Ea = -slope * R
+
+# Plot the data and the regression line
+plt.figure(dpi=500, figsize=(10, 8))
+sns.lineplot(x=data['1/Temp'], y=data['ln(G/T)'], label='Calculated')
+sns.lineplot(x=data['1/Temp'], y=model.predict(X), label='Regression Line')
+
+# Add plot details
+plt.xlabel('1/Temp (1/K)', fontweight='bold', fontsize=11)
+plt.ylabel('ln(G/T)', fontweight='bold', fontsize=11)
+plt.title('H1.5R2 ln(G/T) vs 1/Temp', fontsize=15, fontweight='bold')
+plt.legend()
+
+# Add text for Ea and R-squared
+plt.text(0.1, 0.4, f'Ea: {Ea:.2f} J/mol', transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
+plt.text(0.1, 0.35, f'R²: {R_squared:.2f}', transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
+
+plt.show()

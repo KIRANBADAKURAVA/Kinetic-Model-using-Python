@@ -1,0 +1,73 @@
+#KAS
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+# Load the data from the uploaded Excel file
+file_path = r'C:\Users\Pranav\Desktop\Final H valuessssss\H3AUg.xlsx'  # Use raw string to handle backslashes
+data = pd.read_excel(file_path)
+
+# Add a new column for 1/Temp
+data['1/Temp'] = 1 / data['##Temp./°C']
+
+# Filter the dataset for different alpha values
+alpha_values = data['Alpha'].unique()
+
+# Create dictionaries to store regression results, slopes, R² values, and Ea values
+regression_results = {}
+slopes = {}
+r2_values = {}
+Ea_values = {}
+
+# Gas constant in J/(mol·K)
+R = 8.314
+
+# Set up the plot
+plt.figure(dpi=500, figsize=(10, 8))
+
+# Loop through each alpha value and create a linear regression model
+for alpha in alpha_values:
+    # Filter the data for the current alpha value
+    alpha_data = data[data['Alpha'] == alpha]
+    
+    # Extract the 1/Temp and ln(B/T) columns
+    X = alpha_data['1/Temp']
+    y = alpha_data['ln(B/T)']
+    
+    # Add a constant to the predictor variable matrix (for the intercept)
+    X = sm.add_constant(X)
+    
+    # Create the linear regression model
+    model = sm.OLS(y, X).fit()
+    
+    # Store the results
+    regression_results[alpha] = model
+    
+    # Store the slope (coefficient of 1/Temp)
+    slope = model.params['1/Temp']
+    slopes[alpha] = slope
+    
+    # Store the R² value
+    r2_values[alpha] = model.rsquared
+    
+    # Calculate and store the Ea value
+    Ea = -(slope * R) 
+    Ea_values[alpha] = Ea
+    
+    # Plot the data and the regression line with transparency
+    sns.scatterplot(x=alpha_data['1/Temp'], y=alpha_data['ln(B/T)'], label=f'Alpha = {alpha}', alpha=0.6)
+    sns.lineplot(x=alpha_data['1/Temp'], y=model.predict(X), label=f'Regression line (Alpha = {alpha})', alpha=0.6)
+
+# Add plot details
+plt.xlabel('1/Temperature (1/K)', fontweight='bold', fontsize=11)
+plt.ylabel('ln(B/T)', fontweight='bold', fontsize=11)
+plt.title('1.5% Carbon ln(B/T) vs 1/Temperature for Different Alpha Values', fontsize=15, fontweight='bold')
+
+# Adjust legend to avoid overcrowding (optional)
+handles, labels = plt.gca().get_legend_handles_labels()
+by_label = dict(zip(labels, handles))
+plt.legend(by_label.values(), by_label.keys(), bbox_to_anchor=(1.05, 1), loc='upper left')
+
+plt.show()
+

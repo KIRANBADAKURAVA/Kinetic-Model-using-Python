@@ -2,15 +2,15 @@
 import pandas as pd
 import glob
 
-input_file_path = r"C:\Users\kiran\OneDrive\Desktop\RawData\H4_30.txt"
-output_file_path = r"C:\Users\kiran\OneDrive\Desktop\RawData\H4_30.txt"
+input_file_path = r"C:\Users\kiran\OneDrive\Desktop\New data\HP4_15.txt"
+output_file_path = r"C:\Users\kiran\OneDrive\Desktop\New data\HP4_15.txt"
 with open(input_file_path, 'r') as file:
     lines = file.readlines()
 
 
 start_index = 0
 for i, line in enumerate(lines):
-    if line.startswith('403.45300;13.00000;99.68205;1'):
+    if line.startswith('115.64800;11.00000;99.75319;1'):
         start_index = i
         break
 

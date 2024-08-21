@@ -1,0 +1,20 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+file_path = r'C:\Users\Pranav\Desktop\Final H valuessssss\H3AUg.xlsx'
+data = pd.read_excel(file_path)
+
+plt.figure(dpi=500)
+
+# Plotting
+sns.lineplot(data=data, x='Time/min', y='Mass/%', hue='b', palette='viridis')
+
+# Add title and labels
+plt.title('TGA curves for 1.5% carbon')
+plt.xlabel('Time/min')
+plt.ylabel('Mass%')
+
+# Show the plot
+plt.legend(title='Heating Rate')
+plt.show()
