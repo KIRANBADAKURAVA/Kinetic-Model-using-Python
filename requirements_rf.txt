@@ -1,0 +1,21 @@
+# Random Forest Implementation Requirements
+# Install with: pip install -r requirements_rf.txt
+
+# Core ML libraries
+scikit-learn>=1.3.0
+numpy>=1.21.0
+pandas>=1.5.0
+
+# Visualization
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Data handling
+openpyxl>=3.0.0
+xlrd>=2.0.0
+
+# Model persistence
+joblib>=1.2.0
+
+# Additional utilities
+scipy>=1.9.0
